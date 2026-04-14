@@ -1,0 +1,10 @@
+title = "TimeTracker Gitleaks Config"
+
+[extend]
+useDefault = true   # usa todas las reglas built-in de gitleaks
+
+[[rules]]
+description = "Ignorar placeholders en .env.example"
+id = "env-example-ignore"
+path = '''.env\.example'''
+allowlist = { regexes = [".*"] }

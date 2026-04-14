@@ -1,0 +1,28 @@
+name: PR Branch Guard
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-source-branch:
+    name: Check Source Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch
+        run: |
+          SOURCE="${{ github.head_ref }}"
+          echo "Source branch: $SOURCE"
+
+          if [[ "$SOURCE" == "develop" || "$SOURCE" == hotfix/* ]]; then
+            echo "✅ Branch '$SOURCE' está autorizada para mergear a main"
+          else
+            echo "❌ Branch '$SOURCE' NO puede hacer PR a main directamente"
+            echo ""
+            echo "Solo se aceptan PRs a main desde:"
+            echo "  - develop"
+            echo "  - hotfix/*"
+            echo ""
+            echo "Si es una feature, primero mergeá a develop."
+            exit 1
+          fi

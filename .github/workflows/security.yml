@@ -1,0 +1,38 @@
+name: Security & Changelog
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # necesario para escanear el diff completo
+
+      - name: Detect hardcoded secrets (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  changelog-check:
+    name: CHANGELOG Updated
+    runs-on: ubuntu-latest
+    # Solo aplica en PRs a main (release-ready)
+    if: github.base_ref == 'main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check CHANGELOG.md was updated
+        run: |
+          if ! git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "CHANGELOG.md"; then
+            echo "❌ Este PR a main no incluye cambios en CHANGELOG.md"
+            echo "Agregá una entrada en CHANGELOG.md describiendo los cambios de esta release."
+            exit 1
+          fi
+          echo "✅ CHANGELOG.md actualizado"
