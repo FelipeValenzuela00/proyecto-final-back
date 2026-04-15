@@ -4,8 +4,8 @@
   "description": "Repositorio dedicado a la entrega del trabajo de proyecto final de la carrera Analista en sistemas de ORT Belgrano.",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "repository": {
     "type": "git",
