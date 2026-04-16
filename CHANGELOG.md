@@ -6,11 +6,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- Add develop branch
 
 ### Changed
 
 ### Removed
+
+## [0.1.0] - 2026-04-15
+
+### Added
+- Add develop branch
+
+### Removed
+- CI check till we have Node configured
 
 ## [0.1.0] - 2026-04-10
 
