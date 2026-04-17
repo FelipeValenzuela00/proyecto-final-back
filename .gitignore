@@ -137,3 +137,6 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Local-only pre-commit stub (silences global core.hooksPath on this machine)
+.pre-commit-config.yaml
