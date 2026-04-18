@@ -140,6 +140,5 @@ dist/
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-github-config.md 
-.gitignore
-MVP-TimeTracker-GoogleWorkspace.md
+# Local-only pre-commit stub (silences global core.hooksPath on this machine)
+.pre-commit-config.yaml
