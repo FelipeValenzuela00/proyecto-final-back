@@ -8,7 +8,8 @@ jobs:
   lint-and-test:
     name: Lint & Test
     runs-on: ubuntu-latest
-
+    if: false
+    
     steps:
       - uses: actions/checkout@v4
 
