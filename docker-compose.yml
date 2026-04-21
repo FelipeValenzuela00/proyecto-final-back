@@ -2,10 +2,12 @@ version: '3.8'
 services:
   db:
     image: postgres:15
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: adminpassword
-      POSTGRES_DB: autolog_db
+      POSTGRES_USER: ${UserPostgre}
+      POSTGRES_PASSWORD: ${PasswordPostgre}
+      POSTGRES_DB: ${DatabasePostgre}
     ports:
       - "5432:5432"
     volumes:
