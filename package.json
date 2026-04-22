@@ -1,0 +1,40 @@
+{
+  "name": "proyecto-final-back",
+  "version": "1.0.0",
+  "description": "Repositorio dedicado a la entrega del trabajo de proyecto final de la carrera Analista en sistemas de ORT Belgrano.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "lint": "eslint src/",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FelipeValenzuela00/proyecto-final-back.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FelipeValenzuela00/proyecto-final-back/issues"
+  },
+  "homepage": "https://github.com/FelipeValenzuela00/proyecto-final-back#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.2.0",
+    "globals": "^17.5.0",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.3"
+  },
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  }
+}
