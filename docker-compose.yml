@@ -1,5 +1,12 @@
 version: '3.8'
 services:
+  frontend:
+    build: ../proyecto-final-front
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
   app:
     build: .
     ports:
