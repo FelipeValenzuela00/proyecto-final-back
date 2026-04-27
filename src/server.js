@@ -1,7 +1,7 @@
 require('dotenv').config();
 const app = require('./app'); // Importas el app.js de arriba
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('./shared/database/prisma');
 
 const PORT = process.env.PORT || 3000;
 
