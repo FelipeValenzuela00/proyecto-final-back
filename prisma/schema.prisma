@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+
+// Configuracion del cliente
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+// Configuracion de la base de datos
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// los modelos
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  fullName      String?
+  role          String   @default("employee")
+  googleId      String?  @unique
+  refreshToken  String?  // Lo guardaremos encriptado luego
+  createdAt     DateTime @default(now())
+
+  // Relaciones
+  activities    DailyActivity[]
+  reports       Report[]
+
+  @@map("users") // Buenas prácticas: la tabla en SQL se llamará "users" en minúscula
+}
+
+model DailyActivity {
+  id           String   @id @default(uuid())
+  userId       String
+  source       String   // Ej: 'calendar', 'drive'
+  activityType String   // Ej: 'meeting', 'edit'
+  startTime    DateTime
+  endTime      DateTime
+  metadata     Json?    // Para guardar datos dinámicos de Google
+  createdAt    DateTime @default(now())
+
+  // Relación: Una actividad pertenece a un usuario
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@map("daily_activities")
+}
+
+model Report {
+  id           String   @id @default(uuid())
+  userId       String
+  reportDate   DateTime @db.Date
+  aiSummary    String?
+  finalContent String?
+  status       String   @default("pending") // pending, edited, approved
+  updatedAt    DateTime @default(now()) @updatedAt
+
+  // Relación: Un reporte pertenece a un usuario
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@map("reports")
+}
