@@ -1,5 +1,6 @@
 require('dotenv').config();
-const app = require('./app'); // Importas el app.js de arriba
+const app = require('./app');
+const logger = require('./utils/logger');
 
 const PORT = process.env.PORT || 3000;
 
@@ -7,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 // db.connect().then(() => {
 
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor encendido y escuchando en el puerto ${PORT}`);
+    logger.info(`Servidor escuchando en el puerto ${PORT}`);
 });
 
 // });
