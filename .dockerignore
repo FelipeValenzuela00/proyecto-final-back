@@ -1,0 +1,33 @@
+# Dependencies (se instalan dentro de la imagen)
+node_modules
+
+# Git
+.git
+.gitignore
+
+# Environment (NUNCA deben entrar al build)
+.env
+.env.*
+
+# Docs / CI (no hacen falta en runtime)
+*.md
+.github
+
+# Editor / IDE
+.vscode
+.idea
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dev tooling
+.prettierrc
+eslint.config.js
+
+# Docker (no tiene sentido copiar estos al contexto)
+Dockerfile
+docker-compose.yml
+.dockerignore
