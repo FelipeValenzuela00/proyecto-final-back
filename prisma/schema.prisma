@@ -16,12 +16,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums
+enum Role {
+  EMPLOYEE
+  ADMIN
+}
+
+enum ReportStatus {
+  PENDING
+  EDITED
+  APPROVED
+}
+
 // los modelos
 model User {
   id            String   @id @default(uuid())
   email         String   @unique
   fullName      String?  @map("full_name")
-  role          String   @default("employee")
+  role          Role     @default(EMPLOYEE)
   googleId      String?  @unique @map("google_id")
   refreshToken  String?  @map("refresh_token") // Lo guardaremos encriptado luego
   createdAt     DateTime @default(now()) @map("created_at")
@@ -57,7 +69,7 @@ model Report {
   reportDate   DateTime @db.Date @map("report_date")
   aiSummary    String?  @map("ai_summary")
   finalContent String?  @map("final_content")
-  status       String   @default("pending") // pending, edited, approved
+  status       ReportStatus @default(PENDING)
   updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 
   // Relación: Un reporte pertenece a un usuario
@@ -65,5 +77,6 @@ model Report {
 
   // Índice para optimizar queries por usuario y fecha
   @@index([userId, reportDate])
+  @@unique([userId, reportDate])
   @@map("reports")
 }
