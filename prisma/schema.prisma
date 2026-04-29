@@ -20,11 +20,11 @@ datasource db {
 model User {
   id            String   @id @default(uuid())
   email         String   @unique
-  fullName      String?
+  fullName      String?  @map("full_name")
   role          String   @default("employee")
-  googleId      String?  @unique
-  refreshToken  String?  // Lo guardaremos encriptado luego
-  createdAt     DateTime @default(now())
+  googleId      String?  @unique @map("google_id")
+  refreshToken  String?  @map("refresh_token") // Lo guardaremos encriptado luego
+  createdAt     DateTime @default(now()) @map("created_at")
 
   // Relaciones
   activities    DailyActivity[]
@@ -35,31 +35,35 @@ model User {
 
 model DailyActivity {
   id           String   @id @default(uuid())
-  userId       String
+  userId       String   @map("user_id")
   source       String   // Ej: 'calendar', 'drive'
-  activityType String   // Ej: 'meeting', 'edit'
-  startTime    DateTime
-  endTime      DateTime
+  activityType String   @map("activity_type") // Ej: 'meeting', 'edit'
+  startTime    DateTime @map("start_time")
+  endTime      DateTime @map("end_time")
   metadata     Json?    // Para guardar datos dinámicos de Google
-  createdAt    DateTime @default(now())
+  createdAt    DateTime @default(now()) @map("created_at")
 
   // Relación: Una actividad pertenece a un usuario
   user         User     @relation(fields: [userId], references: [id])
 
+  // Índices para optimizar queries frecuentes
+  @@index([userId, startTime])
   @@map("daily_activities")
 }
 
 model Report {
   id           String   @id @default(uuid())
-  userId       String
-  reportDate   DateTime @db.Date
-  aiSummary    String?
-  finalContent String?
+  userId       String   @map("user_id")
+  reportDate   DateTime @db.Date @map("report_date")
+  aiSummary    String?  @map("ai_summary")
+  finalContent String?  @map("final_content")
   status       String   @default("pending") // pending, edited, approved
-  updatedAt    DateTime @default(now()) @updatedAt
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 
   // Relación: Un reporte pertenece a un usuario
   user         User     @relation(fields: [userId], references: [id])
 
+  // Índice para optimizar queries por usuario y fecha
+  @@index([userId, reportDate])
   @@map("reports")
 }
