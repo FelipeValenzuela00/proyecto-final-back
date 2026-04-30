@@ -1,6 +1,9 @@
 services:
   frontend:
-    build: ../proyecto-final-front
+    build:
+      context: ../proyecto-final-front
+      args:
+        VITE_API_URL: http://localhost:3000
     ports:
       - "80:80"
     depends_on:
