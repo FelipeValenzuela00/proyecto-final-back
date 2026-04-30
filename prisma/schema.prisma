@@ -70,6 +70,7 @@ model Report {
   aiSummary    String?  @map("ai_summary")
   finalContent String?  @map("final_content")
   status       ReportStatus @default(PENDING)
+  createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 
   // Relación: Un reporte pertenece a un usuario

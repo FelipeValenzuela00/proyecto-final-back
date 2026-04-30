@@ -10,7 +10,12 @@ function setupGracefulShutdown(server) {
         console.log(`\n📴 Recibida señal ${signal}, iniciando shutdown graceful...`);
 
         // CIERRE SV HTTPS
-        server.close(async () => {
+        server.close(async (err) => {
+            if (err) {
+                console.error('❌ Error al cerrar el servidor HTTP:', err);
+                process.exit(1);
+            }
+
             console.log('🛑 Servidor HTTP cerrado');
 
             try {
