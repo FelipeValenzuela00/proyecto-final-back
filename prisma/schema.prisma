@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+
+// Configuracion del cliente
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+// Configuracion de la base de datos
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  EMPLOYEE
+  ADMIN
+}
+
+enum ReportStatus {
+  PENDING
+  EDITED
+  APPROVED
+}
+
+// los modelos
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  fullName      String?  @map("full_name")
+  role          Role     @default(EMPLOYEE)
+  googleId      String?  @unique @map("google_id")
+  refreshToken  String?  @map("refresh_token") // Lo guardaremos encriptado luego
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relaciones
+  activities    DailyActivity[]
+  reports       Report[]
+
+  @@map("users") // Buenas prácticas: la tabla en SQL se llamará "users" en minúscula
+}
+
+model DailyActivity {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  // TODO: Migrar a enum cuando se integre Google APIs y Jira (ver valores reales devueltos por las APIs)
+  source       String   // Ej: 'calendar', 'drive'
+  // TODO: Migrar a enum cuando se integre Google APIs y Jira (ver valores reales devueltos por las APIs)
+  activityType String   @map("activity_type") // Ej: 'meeting', 'edit'
+  startTime    DateTime @map("start_time")
+  endTime      DateTime @map("end_time")
+  metadata     Json?    // Para guardar datos dinámicos de Google
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relación: Una actividad pertenece a un usuario
+  user         User     @relation(fields: [userId], references: [id])
+
+  // Índices para optimizar queries frecuentes
+  @@index([userId, startTime])
+  @@map("daily_activities")
+}
+
+model Report {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  reportDate   DateTime @db.Date @map("report_date")
+  aiSummary    String?  @map("ai_summary")
+  finalContent String?  @map("final_content")
+  status       ReportStatus @default(PENDING)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relación: Un reporte pertenece a un usuario
+  user         User     @relation(fields: [userId], references: [id])
+
+  // Índice para optimizar queries por usuario y fecha
+  @@index([userId, reportDate])
+  @@unique([userId, reportDate])
+  @@map("reports")
+}
