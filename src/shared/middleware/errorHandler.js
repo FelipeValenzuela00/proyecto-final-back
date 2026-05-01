@@ -1,3 +1,4 @@
+const { sanitizeForLog } = require('../utils/sanitize');
 
 const sanitizeForLog = (value) => String(value).replace(/[\r\n]/g, '');
 
@@ -13,7 +14,16 @@ const errorHandler = (err, req, res, _next) => {
   const safeMessage = sanitizeForLog(message);
 
   const errorLog = `[${timestamp}] ERROR - ${status} - ${safeMessage} - ${safeMethod} ${safePath}`;
+  const timestamp = new Date().toISOString();
+  const safeMethod = sanitizeForLog(req.method);
+  const safePath = sanitizeForLog(req.path);
+  const safeMessage = sanitizeForLog(message);
+
+  const errorLog = `[${timestamp}] ERROR - ${status} - ${safeMessage} - ${safeMethod} ${safePath}`;
   console.error(errorLog);
+  if (status >= 500) {
+    console.error(err.stack);
+  }
   if (status >= 500) {
     console.error(err.stack);
   }
@@ -21,6 +31,8 @@ const errorHandler = (err, req, res, _next) => {
   res.status(status).json({
     error: {
       status,
+      message: status >= 500 ? 'Internal Server Error' : message,
+      timestamp,
       message: status >= 500 ? 'Internal Server Error' : message,
       timestamp,
     },
