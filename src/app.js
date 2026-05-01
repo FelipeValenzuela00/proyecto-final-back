@@ -5,6 +5,7 @@ const { requestLogger, errorHandler } = require('./shared/middleware');
 const app = express();
 
 // 1. Middlewares Globales
+// TODO: restringir orígenes antes de ir a prod. Ver https://expressjs.com/en/resources/middleware/cors.html
 app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
