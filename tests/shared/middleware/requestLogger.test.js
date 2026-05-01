@@ -6,7 +6,7 @@ const makeRes = (statusCode = 200) => {
   let finishCallback = null;
   return {
     statusCode,
-    on: jest.fn((event, cb) => {
+    once: jest.fn((event, cb) => {
       if (event === 'finish') finishCallback = cb;
     }),
     trigger: () => finishCallback && finishCallback(),
@@ -33,7 +33,7 @@ describe('requestLogger', () => {
     const res = makeRes();
     const next = jest.fn();
     requestLogger(req, res, next);
-    expect(res.on).not.toHaveBeenCalled();
+    expect(res.once).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalled();
   });
 
