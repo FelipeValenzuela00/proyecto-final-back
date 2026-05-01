@@ -14,7 +14,7 @@ const errorHandler = (err, req, res, _next) => {
   const errorLog = `[${timestamp}] ERROR - ${status} - ${safeMessage} - ${safeMethod} ${safePath}`;
   console.error(errorLog);
   if (status >= 500) {
-    console.error(err.stack);
+    console.error(sanitizeForLog(err.stack));
   }
 
   res.status(status).json({
