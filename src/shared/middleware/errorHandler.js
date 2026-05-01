@@ -1,8 +1,8 @@
 const { sanitizeForLog } = require('../utils/sanitize');
 
-const errorHandler = (err, req, res, _next) => {
+const errorHandler = (err, req, res, next) => {
   if (res.headersSent) {
-    return _next(err);
+    return next(err);
   }
   const status = err.status || 500;
   const message = err.message || 'Internal Server Error';
