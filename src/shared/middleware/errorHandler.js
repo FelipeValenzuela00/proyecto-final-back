@@ -1,5 +1,4 @@
-
-const sanitizeForLog = (value) => String(value).replace(/[\r\n]/g, '');
+const { sanitizeForLog } = require('../utils/sanitize');
 
 const errorHandler = (err, req, res, _next) => {
   if (res.headersSent) {
