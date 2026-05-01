@@ -7,7 +7,7 @@ const requestLogger = (req, res, next) => {
   const startTime = Date.now();
 
   // Interceptar cuando la respuesta se envía
-  res.on('finish', () => {
+  res.once('finish', () => {
     const duration = Date.now() - startTime;
     const safePath = sanitizeForLog(req.path || '');
     const safeMethod = sanitizeForLog(req.method);
