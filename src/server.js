@@ -1,67 +1,60 @@
 require('dotenv').config();
-const app = require('./app'); // Importas el app.js de arriba
+const app = require('./app');
 const prisma = require('./shared/database/prisma');
+const logger = require('./shared/utils/logger');
 
 const PORT = process.env.PORT || 3000;
+const SHUTDOWN_TIMEOUT_MS = 10000;
 
-// FUNCION PARA MANEJAR EL CIERRE
 function setupGracefulShutdown(server) {
-    const gracefulShutdown = async (signal) => {
-        console.log(`\n📴 Recibida señal ${signal}, iniciando shutdown graceful...`);
+    const gracefulShutdown = (signal) => {
+        logger.info(`Recibida señal ${signal}, iniciando shutdown graceful...`);
 
-        // CIERRE SV HTTPS
         server.close(async (err) => {
             if (err) {
-                console.error('❌ Error al cerrar el servidor HTTP:', err);
+                logger.error('Error al cerrar el servidor HTTP', { error: err.message, stack: err.stack });
                 process.exit(1);
             }
 
-            console.log('🛑 Servidor HTTP cerrado');
+            logger.info('Servidor HTTP cerrado');
 
             try {
-                // DESCNECTAR PRISMA
                 await prisma.$disconnect();
-                console.log('✅ Conexión a Prisma cerrada correctamente');
+                logger.info('Conexión a Prisma cerrada correctamente');
                 process.exit(0);
             } catch (error) {
-                console.error('❌ Error al desconectar Prisma:', error);
+                logger.error('Error al desconectar Prisma', { error: error.message, stack: error.stack });
                 process.exit(1);
             }
         });
 
-        // FORZAR SALIDA SI EL SHUTDOWN TARDA DEMASIADO
         setTimeout(() => {
-            console.error('⚠️ Timeout en shutdown, forzando salida...');
+            logger.error('Timeout en shutdown, forzando salida...');
             process.exit(1);
-        }, 10000);
+        }, SHUTDOWN_TIMEOUT_MS);
     };
 
-    // Registrar handlers para SIGINT y SIGTERM
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
-    // Manejo adicional para beforeExit
     process.on('beforeExit', () => {
-        console.log('💤 Proceso está a punto de terminar...');
+        logger.info('Proceso está a punto de terminar...');
     });
 }
 
 async function startServer() {
     try {
-        // INTENTO CONECTAR DB
         await prisma.$connect();
-        console.log('✅ Conexión a la base de datos PostgreSQL exitosa (Prisma)');
+        logger.info('Conexión a la base de datos PostgreSQL exitosa (Prisma)');
 
-        // LEVANTA SV y guarda la referencia
         const server = app.listen(PORT, () => {
-            console.log(`🚀 Servidor encendido y escuchando en el puerto ${PORT}`);
+            logger.info(`Servidor escuchando en el puerto ${PORT}`);
         });
 
-        // APLICA SHUTDOWN DE DB Y SV HTTPS
         setupGracefulShutdown(server);
     } catch (error) {
-        console.error('❌ Error fatal al conectar a la base de datos:', error);
-        process.exit(1); // APAGA EL PROCESO SI NO SE PUEDE CONECTAR A LA DB
+        logger.error('Error fatal al conectar a la base de datos', { error: error.message, stack: error.stack });
+        process.exit(1);
     }
 }
 

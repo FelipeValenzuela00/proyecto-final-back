@@ -8,6 +8,8 @@ RUN npm install
 
 COPY --chown=node:node . .
 
+RUN mkdir -p logs && chown -R node:node logs
+
 USER node
 
 EXPOSE 3000

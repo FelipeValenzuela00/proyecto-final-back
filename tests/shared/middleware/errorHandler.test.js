@@ -1,3 +1,10 @@
+jest.mock('../../../src/shared/utils/logger', () => ({
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+}));
+
+const logger = require('../../../src/shared/utils/logger');
 const errorHandler = require('../../../src/shared/middleware/errorHandler');
 
 const makeReq = (overrides = {}) => ({
@@ -22,14 +29,10 @@ const makeRes = (overrides = {}) => ({
 });
 
 describe('errorHandler', () => {
-  let consoleSpy;
-
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    consoleSpy.mockRestore();
+    logger.info.mockClear();
+    logger.warn.mockClear();
+    logger.error.mockClear();
   });
 
   test('defaults to status 500 when err.status is absent', () => {
@@ -64,9 +67,11 @@ describe('errorHandler', () => {
   test('sanitizes CRLF in method, path and message before logging', () => {
     const req = makeReq({ method: 'GET\r\nINJECTED', path: '/foo\r\nbar' });
     errorHandler({ status: 400, message: 'bad\r\ninput' }, req, makeRes(), jest.fn());
-    const logged = consoleSpy.mock.calls[0][0];
-    expect(logged).not.toMatch(/\r/);
-    expect(logged).not.toMatch(/\n/);
+    const [message, meta] = logger.warn.mock.calls[0];
+    expect(message).not.toMatch(/[\r\n]/);
+    expect(meta.method).not.toMatch(/[\r\n]/);
+    expect(meta.path).not.toMatch(/[\r\n]/);
+    expect(meta.message).not.toMatch(/[\r\n]/);
   });
 
   test('sanitizes CRLF in err.stack log for 5xx errors', () => {
@@ -76,21 +81,22 @@ describe('errorHandler', () => {
       stack: 'Error: crash\r\n  at line 1\r\n  at line 2',
     };
     errorHandler(err, makeReq(), makeRes(), jest.fn());
-    const stackLog = consoleSpy.mock.calls[1][0];
-    expect(stackLog).not.toMatch(/\r/);
-    expect(stackLog).not.toMatch(/\n/);
+    const [, meta] = logger.error.mock.calls[0];
+    expect(meta.stack).not.toMatch(/[\r\n]/);
   });
 
-  test('logs stack for 5xx but not for 4xx', () => {
+  test('5xx logs with logger.error; 4xx logs with logger.warn', () => {
     errorHandler(
       { status: 400, message: 'bad', stack: 'Error: bad\n  at line 1' },
       makeReq(),
       makeRes(),
       jest.fn(),
     );
-    const calls4xx = consoleSpy.mock.calls.length;
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
 
-    consoleSpy.mockClear();
+    logger.warn.mockClear();
+    logger.error.mockClear();
 
     errorHandler(
       { status: 500, message: 'crash', stack: 'Error: crash\n  at line 1' },
@@ -98,9 +104,7 @@ describe('errorHandler', () => {
       makeRes(),
       jest.fn(),
     );
-    const calls5xx = consoleSpy.mock.calls.length;
-
-    expect(calls4xx).toBe(1);
-    expect(calls5xx).toBe(2);
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

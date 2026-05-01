@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const { sanitizeForLog } = require('../utils/sanitize');
 
 const errorHandler = (err, req, res, next) => {
@@ -11,10 +12,20 @@ const errorHandler = (err, req, res, next) => {
   const safePath = sanitizeForLog(req.path);
   const safeMessage = sanitizeForLog(message);
 
-  const errorLog = `[${timestamp}] ERROR - ${status} - ${safeMessage} - ${safeMethod} ${safePath}`;
-  console.error(errorLog);
+  const meta = {
+    status,
+    method: safeMethod,
+    path: safePath,
+    message: safeMessage,
+  };
+
   if (status >= 500) {
-    console.error(sanitizeForLog(err.stack));
+    logger.error(`ERROR ${status} - ${safeMethod} ${safePath} - ${safeMessage}`, {
+      ...meta,
+      stack: sanitizeForLog(err.stack),
+    });
+  } else {
+    logger.warn(`ERROR ${status} - ${safeMethod} ${safePath} - ${safeMessage}`, meta);
   }
 
   res.status(status).json({
