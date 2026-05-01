@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const { requestLogger, errorHandler } = require('./shared/middleware');
-const httpLogger = require('./middleware/httpLogger');
 
 const app = express();
 
@@ -10,7 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
-app.use(httpLogger);
 
 // 2. Rutas Base (las irán agregando a medida que hagan los módulos)
 // const authRoutes = require('./modules/auth/auth.routes');

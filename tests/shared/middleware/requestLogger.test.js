@@ -1,3 +1,10 @@
+jest.mock('../../../src/shared/utils/logger', () => ({
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+}));
+
+const logger = require('../../../src/shared/utils/logger');
 const requestLogger = require('../../../src/shared/middleware/requestLogger');
 
 const makeReq = (path = '/test', method = 'GET') => ({ path, method });
@@ -14,18 +21,10 @@ const makeRes = (statusCode = 200) => {
 };
 
 describe('requestLogger', () => {
-  let logSpy, warnSpy, errorSpy;
-
   beforeEach(() => {
-    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    logSpy.mockRestore();
-    warnSpy.mockRestore();
-    errorSpy.mockRestore();
+    logger.info.mockClear();
+    logger.warn.mockClear();
+    logger.error.mockClear();
   });
 
   test('/health skips logging — no finish listener registered', () => {
@@ -42,30 +41,36 @@ describe('requestLogger', () => {
     const res = makeRes(201);
     requestLogger(req, res, jest.fn());
     res.trigger();
-    expect(logSpy).toHaveBeenCalledTimes(1);
-    const logged = logSpy.mock.calls[0][0];
-    expect(logged).toMatch(/POST/);
-    expect(logged).toMatch(/\/api\/users/);
-    expect(logged).toMatch(/201/);
-    expect(logged).toMatch(/\d+ms/);
+    expect(logger.info).toHaveBeenCalledTimes(1);
+    const [message, meta] = logger.info.mock.calls[0];
+    expect(message).toMatch(/POST/);
+    expect(message).toMatch(/\/api\/users/);
+    expect(message).toMatch(/201/);
+    expect(message).toMatch(/\d+ms/);
+    expect(meta).toMatchObject({
+      method: 'POST',
+      path: '/api/users',
+      status: 201,
+    });
+    expect(typeof meta.durationMs).toBe('number');
   });
 
-  test('5xx: uses console.error', () => {
+  test('5xx: uses logger.error', () => {
     const res = makeRes(503);
     requestLogger(makeReq('/api/fail'), res, jest.fn());
     res.trigger();
-    expect(errorSpy).toHaveBeenCalledTimes(1);
-    expect(warnSpy).not.toHaveBeenCalled();
-    expect(logSpy).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
-  test('4xx: uses console.warn', () => {
+  test('4xx: uses logger.warn', () => {
     const res = makeRes(404);
     requestLogger(makeReq('/api/missing'), res, jest.fn());
     res.trigger();
-    expect(warnSpy).toHaveBeenCalledTimes(1);
-    expect(errorSpy).not.toHaveBeenCalled();
-    expect(logSpy).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
   test('sanitizes CRLF in method and path before logging', () => {
@@ -73,8 +78,9 @@ describe('requestLogger', () => {
     const res = makeRes(200);
     requestLogger(req, res, jest.fn());
     res.trigger();
-    const logged = logSpy.mock.calls[0][0];
-    expect(logged).not.toMatch(/\r/);
-    expect(logged).not.toMatch(/\n/);
+    const [message, meta] = logger.info.mock.calls[0];
+    expect(message).not.toMatch(/[\r\n]/);
+    expect(meta.method).not.toMatch(/[\r\n]/);
+    expect(meta.path).not.toMatch(/[\r\n]/);
   });
 });

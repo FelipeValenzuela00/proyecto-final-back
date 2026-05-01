@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const { sanitizeForLog } = require('../utils/sanitize');
 
 const requestLogger = (req, res, next) => {
@@ -6,18 +7,24 @@ const requestLogger = (req, res, next) => {
   }
   const startTime = Date.now();
 
-  // Interceptar cuando la respuesta se envía
   res.once('finish', () => {
     const duration = Date.now() - startTime;
     const safePath = sanitizeForLog(req.path || '');
     const safeMethod = sanitizeForLog(req.method);
-    const log = `[${new Date().toISOString()}] ${safeMethod} ${safePath} - ${res.statusCode} - ${duration}ms`;
+    const meta = {
+      method: safeMethod,
+      path: safePath,
+      status: res.statusCode,
+      durationMs: duration,
+    };
+    const message = `${safeMethod} ${safePath} - ${res.statusCode} - ${duration}ms`;
+
     if (res.statusCode >= 500) {
-      console.error(log);
+      logger.error(message, meta);
     } else if (res.statusCode >= 400) {
-      console.warn(log);
+      logger.warn(message, meta);
     } else {
-      console.log(log);
+      logger.info(message, meta);
     }
   });
 
