@@ -14,15 +14,15 @@ jobs:
           SOURCE="${{ github.head_ref }}"
           echo "Source branch: $SOURCE"
 
-          if [[ "$SOURCE" == "develop" || "$SOURCE" == hotfix/* ]]; then
+          if [[ "$SOURCE" == release/* || "$SOURCE" == hotfix/* ]]; then
             echo "✅ Branch '$SOURCE' está autorizada para mergear a main"
           else
             echo "❌ Branch '$SOURCE' NO puede hacer PR a main directamente"
             echo ""
             echo "Solo se aceptan PRs a main desde:"
-            echo "  - develop"
+            echo "  - release/*"
             echo "  - hotfix/*"
             echo ""
-            echo "Si es una feature, primero mergeá a develop."
+            echo "Si es una feature, mergeá a develop primero y luego creá una release branch."
             exit 1
           fi
