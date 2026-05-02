@@ -1,0 +1,40 @@
+const logger = require('../utils/logger');
+const { sanitizeForLog } = require('../utils/sanitize');
+
+const errorHandler = (err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+  const status = err.status || 500;
+  const message = err.message || 'Internal Server Error';
+  const timestamp = new Date().toISOString();
+  const safeMethod = sanitizeForLog(req.method);
+  const safePath = sanitizeForLog(req.path);
+  const safeMessage = sanitizeForLog(message);
+
+  const meta = {
+    status,
+    method: safeMethod,
+    path: safePath,
+    message: safeMessage,
+  };
+
+  if (status >= 500) {
+    logger.error(`ERROR ${status} - ${safeMethod} ${safePath} - ${safeMessage}`, {
+      ...meta,
+      stack: sanitizeForLog(err.stack),
+    });
+  } else {
+    logger.warn(`ERROR ${status} - ${safeMethod} ${safePath} - ${safeMessage}`, meta);
+  }
+
+  res.status(status).json({
+    error: {
+      status,
+      message: status >= 500 ? 'Internal Server Error' : message,
+      timestamp,
+    },
+  });
+};
+
+module.exports = errorHandler;

@@ -5,11 +5,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-02
+
 ### Added
+- Express app setup with `src/app.js` and `src/server.js` (singleton pattern, graceful shutdown on SIGINT/SIGTERM)
+- Modular project structure under `src/modules/` with scaffolded stubs for admin, ai, auth, google, and reports modules
+- Prisma ORM with PostgreSQL: schema defining `User`, `DailyActivity`, and `Report` models with enums `Role` and `ReportStatus`
+- Initial database migration (`20260430214657_init`) and seed script with sample employee data
+- Shared middleware: `requestLogger` (HTTP access logging, skips `/health`) and `errorHandler` (4xx → warn, 5xx → error, hides internal details from clients)
+- CRLF log-injection sanitization utility (`src/shared/utils/sanitize.js`) applied across all middleware logging
+- Winston logger with colorized console transport and rotating JSON file transports for `error.log` and `combined.log`
+- Jest test suite covering `errorHandler`, `requestLogger`, and `sanitizeForLog`
+- Dockerfile using `node:20-slim` with non-root `node` user
+- Docker Compose with `app` and `postgres:15` services
+- CodeQL workflow for JavaScript/TypeScript security analysis on push and pull requests to `main`/`develop`
+- PR description template (`.github/pull_request_template.md`)
+- ESLint and Prettier configuration
+- `.dockerignore` and `.env.example`
 
 ### Changed
-
-### Removed
+- CI workflow updated to run from the repository root (removed `backend/` working-directory prefix)
+- Security workflow refactored to install and run gitleaks binary locally instead of using the cloud-licensed action
 
 ## [0.1.1] - 2026-04-18
 
