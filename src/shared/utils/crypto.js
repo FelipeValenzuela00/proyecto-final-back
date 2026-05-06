@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 const ALGORITHM = 'aes-256-gcm';
 
-const secretKey = process.env.ENCRYPTION_KEY
+
 
 /**
  * Encripta un texto usando AES-256-GCM
@@ -13,6 +13,8 @@ const secretKey = process.env.ENCRYPTION_KEY
  */
 
 function encrypt(text) {
+    const secretKey = process.env.ENCRYPTION_KEY;
+
     if (!secretKey || secretKey.length !== 64) {
         throw new Error('ENCRYPTION_KEY must be a 64-character hexadecimal string');
     }
@@ -34,6 +36,7 @@ function encrypt(text) {
  * @returns {string} - El texto plano original
  */
 function decrypt(hash) {
+    const secretKey = process.env.ENCRYPTION_KEY;
     if (!secretKey || secretKey.length !== 64) {
         throw new Error('ENCRYPTION_KEY must be a 64-character hexadecimal string');
     }
